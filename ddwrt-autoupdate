@@ -1,0 +1,95 @@
+#!/bin/bash
+
+set -euo pipefail
+
+server_ftp="ftp://ftp.dd-wrt.com/betas"
+server_https="https://download1.dd-wrt.com/dd-wrtv2/downloads/betas"
+
+stop() {
+    echo "$@"
+    echo
+    exit
+}
+
+error() {
+    2>&1 echo "Error:" "$@"
+    exit 1
+}
+
+echo
+echo "Getting latest DD-WRT release info..."
+
+year=$( curl -fsl "$server_ftp/" | tail -n1 )
+[[ "$year" =~ ^[0-9]{4}$ ]] || error "Unexpected directory: $year"
+(( $year >= 2019 )) || error "Unexpected year: $year"
+
+release_tag=$( curl -fsl "$server_ftp/$year/" | tail -n1 )
+[[ "$release_tag" =~ ^((0[1-9]|1[0-2])[-](0[1-9]|[1-2][0-9]|3[0-1])[-]($year))[-]r([0-9]+)$ ]] || error "Unexpected directory: $year/$release_tag"
+
+month="${BASH_REMATCH[2]}"
+day="${BASH_REMATCH[3]}"
+
+date_US="${BASH_REMATCH[1]}"
+date_int="$year-$month-$day"
+date_num="$year$month$day"
+
+release_num="${BASH_REMATCH[5]}"
+
+tag="r$release_num-$date_num"
+
+echo "Latest release is: r$release_num ($date_int)"
+echo
+
+set_firmware_files
+
+mkdir -p "$local_repo"
+cd "$local_repo"
+
+tmp='.tmp'
+rm -rf "$tmp"
+
+echo "Device: $device_name"
+[[ ! -e "$tag" ]] || stop "Release 'r$release_num' already processed"
+
+mkdir "$tmp"
+cd "$tmp"
+
+echo "Backing up current device configuration..."
+curl -fsJO -u "$device_credentials" "$device_address/nvrambak.bin"
+echo
+
+echo "Downloading firmware..."
+curl -f -o "$local_firmware_file" "$server_https/$year/$release_tag/$remote_firmware_file"
+[[ "$(head -c4 "$local_firmware_file")" == "HDR0" ]] || error "Firmware header check failed"
+# TODO: Check file length against header.
+echo
+
+cd ..
+mv "$tmp" "$tag"
+cd "$tag"
+
+echo "Updating firmware..."
+curl -f -u "$device_credentials" -H "Referer: $device_address/Upgrade.asp" -F "erase=0" -F "file=@$local_firmware_file" "$device_address/upgrade.cgi" >/dev/null
+echo
+
+if [[ "$ping_device" == "yes" ]]; then
+
+    echo "Waiting 30 seconds..."
+    sleep 30
+    echo
+
+    echo "Pinging device..."
+    until curl -fs -u "$device_credentials" "$device_address/nvrambak.bin" >/dev/null
+    do
+        echo -n "."
+        sleep 1
+    done
+    echo "OK"
+    echo
+
+else
+
+    echo "Done"
+    echo
+
+fi

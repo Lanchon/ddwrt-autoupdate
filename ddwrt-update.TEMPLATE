@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# This is a template for DD-WRT device configuration files:
+# - Create a copy of this file for each of your devices.
+# - Name it 'ddwrt-update-<your_device_name>'.
+# - Mark it as executable if necessary.
+
+set -eu
+
+# Configure the location of the 'ddwrt-autoupdater' software:
+# - By default use the directory where this device configuration file is located:
+base_dir="$(dirname "$(readlink -f "$0")")"
+# - But if you move your device configuration file(s) (eg: to '$HOME/bin/'), configure the installation directory here:
+#base_dir="$HOME/opt/ddwrt-autoupdate"
+
+# Configure parameters for your device:
+device_type="netgear-ac1450"
+device_name="$device_type"
+device_address="http://192.168.1.1"
+device_credentials="ADMIN_USER:ADMIN_PASSWORD"
+
+# The location of the local repository of downloaded firmware images and configuration backups for this device:
+local_repo="$base_dir/repos/$device_name"
+
+# The location and naming of firmware images for this device:
+set_firmware_files() {
+
+    # Available variables:
+    # - year, month, day
+    # - date_US, date_int, date_num
+    # - release_tag, release_num, tag
+
+    # Variable 'tag' can be customized here.
+
+    local firmware_file="$device_type-webflash.bin"
+    remote_firmware_file="$device_type/$firmware_file"
+    local_firmware_file="$tag-$firmware_file"
+
+}
+
+# Configure whether to wait for and ping the device after firmware updates (either "yes" or "no"):
+ping_device="yes"
+
+# Now run the main updater code:
+source "$base_dir/ddwrt-autoupdate" "$@"
