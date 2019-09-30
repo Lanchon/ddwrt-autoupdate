@@ -55,7 +55,7 @@ mkdir "$tmp"
 cd "$tmp"
 
 echo "Backing up current device configuration..."
-curl -fsJO -u "$device_credentials" "$device_address/nvrambak.bin"
+curl -fsJO -u "$device_credentials" $device_https_config "$device_address/nvrambak.bin"
 echo
 
 echo "Downloading firmware..."
@@ -69,7 +69,7 @@ mv "$tmp" "$tag"
 cd "$tag"
 
 echo "Updating firmware..."
-curl -f -u "$device_credentials" -H "Referer: $device_address/Upgrade.asp" -F "erase=0" -F "file=@$local_firmware_file" "$device_address/upgrade.cgi" >/dev/null
+curl -f -u "$device_credentials" -H "Referer: $device_address/Upgrade.asp" -F "erase=0" -F "file=@$local_firmware_file" $device_https_config "$device_address/upgrade.cgi" >/dev/null
 echo
 
 if [[ "$ping_device" == "yes" ]]; then
@@ -79,7 +79,7 @@ if [[ "$ping_device" == "yes" ]]; then
     echo
 
     echo "Pinging device..."
-    until curl -fs -u "$device_credentials" "$device_address/nvrambak.bin" >/dev/null
+    until curl -fs -u "$device_credentials" $device_https_config "$device_address/nvrambak.bin" >/dev/null
     do
         echo -n "."
         sleep 1

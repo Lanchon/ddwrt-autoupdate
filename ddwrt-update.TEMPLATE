@@ -17,6 +17,7 @@ base_dir="$(dirname "$(readlink -f "$0")")"
 device_type="netgear-ac1450"
 device_name="$device_type"
 device_address="http://192.168.1.1"
+device_https_config="--insecure"
 device_credentials="ADMIN_USER:ADMIN_PASSWORD"
 
 # The location of the local repository of downloaded firmware images and configuration backups for this device:
