@@ -59,7 +59,7 @@ curl -LfsJO -u "$device_credentials" $device_https_config "$device_address/nvram
 echo
 
 echo "Downloading firmware..."
-curl -Lf -o "$local_firmware_file" "$server_https/$year/$release_tag/$remote_firmware_file"
+curl -Lf# -o "$local_firmware_file" "$server_https/$year/$release_tag/$remote_firmware_file"
 [[ "$(head -c4 "$local_firmware_file")" == "HDR0" ]] || error "Firmware header check failed"
 # TODO: Check file length against header.
 echo
@@ -69,7 +69,7 @@ mv "$tmp" "$tag"
 cd "$tag"
 
 echo "Updating firmware..."
-curl -Lf -u "$device_credentials" -H "Referer: $device_address/Upgrade.asp" -F "erase=0" -F "file=@$local_firmware_file" $device_https_config "$device_address/upgrade.cgi" >/dev/null
+curl -Lf# -u "$device_credentials" -H "Referer: $device_address/Upgrade.asp" -F "erase=0" -F "file=@$local_firmware_file" $device_https_config "$device_address/upgrade.cgi" >/dev/null
 echo
 
 if [[ "$ping_device" == "yes" ]]; then
