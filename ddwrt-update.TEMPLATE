@@ -39,6 +39,29 @@ set_firmware_files() {
 
 }
 
+# Device backup callback:
+on_device_backup() {
+
+    # Use 'cat /proc/mtd' to list mtd partitions.
+
+    #backup_partition mtd0 boot
+    #backup_partition mtd1 nvram
+    #backup_partition mtd4 board_data
+
+}
+
+backup_partition() {
+
+    local device="$1"
+    local name="$2"
+
+    local device_ssh="< ssh parameters needed to connect to your device >"
+
+    echo "Backing up $device partition ($name)..."
+    ssh -q $device_ssh "cat /dev/$device" >$device-$name.img
+
+}
+
 # Configure whether to wait for and ping the device after firmware updates (either "yes" or "no"):
 ping_device="yes"
 

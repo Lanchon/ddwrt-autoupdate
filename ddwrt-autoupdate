@@ -54,8 +54,10 @@ echo "Device: $device_name"
 mkdir "$tmp"
 cd "$tmp"
 
-echo "Backing up current device configuration..."
+echo "Backing up device configuration..."
 curl -LfsJO -u "$device_credentials" $device_https_config "$device_address/nvrambak.bin"
+
+if declare -F on_device_backup &>/dev/null; then on_device_backup; fi
 echo
 
 echo "Downloading firmware..."
