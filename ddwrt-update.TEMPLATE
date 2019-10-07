@@ -48,6 +48,8 @@ on_device_backup() {
     #backup_partition mtd1 nvram
     #backup_partition mtd4 board_data
 
+    :
+
 }
 
 backup_partition() {
