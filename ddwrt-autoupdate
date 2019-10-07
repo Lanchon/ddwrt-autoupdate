@@ -62,8 +62,11 @@ echo
 
 echo "Downloading firmware..."
 curl -Lf# -o "$local_firmware_file" "$server_https/$year/$release_tag/$remote_firmware_file"
-[[ "$(head -c4 "$local_firmware_file")" == "HDR0" ]] || error "Firmware header check failed"
+
+# Check header (disabled because firmwares for different routers use different headers):
+# [[ "$(head -c4 "$local_firmware_file")" == "HDR0" ]] || error "Firmware header check failed"
 # TODO: Check file length against header.
+
 echo
 
 cd ..
