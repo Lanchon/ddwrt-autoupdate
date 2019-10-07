@@ -67,6 +67,9 @@ curl -Lf# -o "$local_firmware_file" "$server_https/$year/$release_tag/$remote_fi
 # [[ "$(head -c4 "$local_firmware_file")" == "HDR0" ]] || error "Firmware header check failed"
 # TODO: Check file length against header.
 
+# Ensure firmware is at least 1 MiB in size:
+(( "$(stat --printf '%s' "$local_firmware_file")" >= (1 * 1024 * 1024) )) || error "Firmware size check failed"
+
 echo
 
 cd ..
