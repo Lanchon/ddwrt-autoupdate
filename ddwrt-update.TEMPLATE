@@ -64,6 +64,12 @@ backup_partition() {
 
 }
 
+# Defective DD-WRT releases are usually pulled from the download servers soon after their release.
+# It is recommended to skip the latest release(s) to avoid installing untested firmware images.
+
+# Configure the number of releases prior to the latest release to use (0 means use latest release):
+prior_to_latest=1
+
 # Configure whether to wait for and ping the device after firmware updates (either "yes" or "no"):
 ping_device="yes"
 

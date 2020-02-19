@@ -20,16 +20,34 @@ list_files() {
     curl -Lfs "$url" | sed -n 's/^<a href="\([^/"]*\)\/">\1\/<\/a>.*$/\1/p'
 }
 
+get_latest_releases() {
+
+    local year=$( list_files "$server_https" | tail -n1 )
+    [[ "$year" =~ ^[0-9]{4}$ ]] || error "Unexpected directory: $year"
+    (( $year >= 2019 )) || error "Unexpected year: $year"
+
+    exec 11< <( list_files "$server_https/$(( $year - 1 ))" )
+    exec 10< <( list_files "$server_https/$(( $year - 0 ))" )
+    local ym1=$( cat <&11 )
+    local ym0=$( cat <&10 )
+
+    for y in "$ym1" "$ym0"; do
+        [[ "$y" != "" ]] || error "Unable to list latest releases"
+        cat <<<"$y"
+    done
+
+}
+
 echo
-echo "Getting latest DD-WRT release info..."
+echo "Getting info of latest DD-WRT releases..."
 
-year=$( list_files "$server_https" | tail -n1 )
-[[ "$year" =~ ^[0-9]{4}$ ]] || error "Unexpected directory: $year"
-(( $year >= 2019 )) || error "Unexpected year: $year"
+latest_releases=$( get_latest_releases )
+release_tag=$( { echo; echo "$latest_releases"; } | tail -n$(( $prior_to_latest + 1 )) | head -n1 )
+[[ "$release_tag" != "" ]] || error "Chosen prior-to-latest release cannot be from before last year"
 
-release_tag=$( list_files "$server_https/$year" | tail -n1 )
-[[ "$release_tag" =~ ^((0[1-9]|1[0-2])[-](0[1-9]|[1-2][0-9]|3[0-1])[-]($year))[-]r([0-9]+)$ ]] || error "Unexpected directory: $year/$release_tag"
+[[ "$release_tag" =~ ^((0[1-9]|1[0-2])[-](0[1-9]|[1-2][0-9]|3[0-1])[-](2[0-9][0-9][0-9]))[-]r([0-9]+)$ ]] || error "Unexpected release tag: $release_tag"
 
+year="${BASH_REMATCH[4]}"
 month="${BASH_REMATCH[2]}"
 day="${BASH_REMATCH[3]}"
 
@@ -41,7 +59,7 @@ release_num="${BASH_REMATCH[5]}"
 
 tag="r$release_num-$date_num"
 
-echo "Latest release is: r$release_num ($date_int)"
+echo "Chosen release ($prior_to_latest prior to latest): r$release_num ($date_int)"
 echo
 
 set_firmware_files
