@@ -13,8 +13,8 @@
 
 
 ```
-Getting latest DD-WRT release info...
-Latest release is: r41075 (2019-09-20)
+Getting info of latest DD-WRT releases...
+Chosen release (1 prior to latest): r42366 (2020-02-14)
 
 Device: netgear-ac1450
 Backing up device configuration...
