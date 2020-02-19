@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-server_ftp="ftp://ftp.dd-wrt.com/betas"
 server_https="https://download1.dd-wrt.com/dd-wrtv2/downloads/betas"
 
 stop() {
@@ -16,14 +15,19 @@ error() {
     exit 1
 }
 
+list_files() {
+    local url="$1"
+    curl -Lfs "$url" | sed -n 's/^<a href="\([^/"]*\)\/">\1\/<\/a>.*$/\1/p'
+}
+
 echo
 echo "Getting latest DD-WRT release info..."
 
-year=$( curl -fsl "$server_ftp/" | tail -n1 )
+year=$( list_files "$server_https" | tail -n1 )
 [[ "$year" =~ ^[0-9]{4}$ ]] || error "Unexpected directory: $year"
 (( $year >= 2019 )) || error "Unexpected year: $year"
 
-release_tag=$( curl -fsl "$server_ftp/$year/" | tail -n1 )
+release_tag=$( list_files "$server_https/$year" | tail -n1 )
 [[ "$release_tag" =~ ^((0[1-9]|1[0-2])[-](0[1-9]|[1-2][0-9]|3[0-1])[-]($year))[-]r([0-9]+)$ ]] || error "Unexpected directory: $year/$release_tag"
 
 month="${BASH_REMATCH[2]}"
