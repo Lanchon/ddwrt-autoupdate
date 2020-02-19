@@ -11,7 +11,7 @@ stop() {
 }
 
 error() {
-    2>&1 echo "Error:" "$@"
+    >&2 echo "Error:" "$@"
     exit 1
 }
 
