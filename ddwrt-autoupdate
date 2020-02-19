@@ -77,6 +77,7 @@ curl -Lf# -o "$local_firmware_file" "$server_https/$year/$release_tag/$remote_fi
 echo
 
 cd ..
+[[ ! -e "$tag" ]] || error "Unexpected directory creation: $tag"
 mv "$tmp" "$tag"
 cd "$tag"
 
