@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+manual_tag="${1:-}"
+
 server_https="https://download1.dd-wrt.com/dd-wrtv2/downloads/betas"
 
 stop() {
@@ -39,11 +41,15 @@ get_latest_releases() {
 }
 
 echo
-echo "Getting info of latest DD-WRT releases..."
 
-latest_releases=$( get_latest_releases )
-release_tag=$( { echo; echo "$latest_releases"; } | tail -n$(( $prior_to_latest + 1 )) | head -n1 )
-[[ "$release_tag" != "" ]] || error "Chosen prior-to-latest release cannot be from before last year"
+if [[ "$manual_tag" == "" ]]; then
+    echo "Getting info of latest DD-WRT releases..."
+    latest_releases=$( get_latest_releases )
+    release_tag=$( { echo; echo "$latest_releases"; } | tail -n$(( $prior_to_latest + 1 )) | head -n1 )
+    [[ "$release_tag" != "" ]] || error "Chosen prior-to-latest release cannot be from before last year"
+else
+    release_tag="$manual_tag"
+fi
 
 [[ "$release_tag" =~ ^((0[1-9]|1[0-2])[-](0[1-9]|[1-2][0-9]|3[0-1])[-](2[0-9][0-9][0-9]))[-]r([0-9]+)$ ]] || error "Unexpected release tag: $release_tag"
 
@@ -59,7 +65,13 @@ release_num="${BASH_REMATCH[5]}"
 
 tag="r$release_num-$date_num"
 
-echo "Chosen release ($prior_to_latest prior to latest): r$release_num ($date_int)"
+if [[ "$manual_tag" == "" ]]; then
+    echo "Chosen release ($prior_to_latest prior to latest): r$release_num ($date_int)"
+else
+    echo "Chosen release (manual): r$release_num ($date_int)"
+    tag="${tag}_$( date '+%Y-%m-%d_%H-%M-%S' )"
+fi
+
 echo
 
 set_firmware_files
