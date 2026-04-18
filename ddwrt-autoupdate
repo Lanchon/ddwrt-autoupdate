@@ -19,6 +19,7 @@ error() {
 
 list_files() {
     local url="$1"
+    [[ "$url" == */ ]] || url="$url/"
     curl -Lfs "$url" | sed -n 's/^<a href="\([^/"]*\)\/">\1\/<\/a>.*$/\1/p'
 }
 
