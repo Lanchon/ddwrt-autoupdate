@@ -25,7 +25,7 @@ list_files() {
 
 get_latest_releases() {
 
-    local year=$( list_files "$server_https" | grep -E '^[0-9]{4}$' | tail -n1 )
+    local year=$( list_files "$server_https" | grep -E '^[0-9]{4}$' | sort -n | tail -n1 )
     [[ "$year" =~ ^[0-9]{4}$ ]] || error "Unexpected directory: $year"
     (( $year >= 2019 )) || error "Unexpected year: $year"
 
